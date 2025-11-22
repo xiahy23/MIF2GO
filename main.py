@@ -19,7 +19,7 @@ def train(args):
     print("loading features...")
     uniprot = pd.read_pickle(os.path.join(args.data_path, args.species, "features.pkl"))
 
-    device = torch.device('cuda:0')
+    device = torch.device('cuda:'+args.device)
     if 'embeddings.npy' not in os.listdir('./data/'+args.species+'/trained_emb_files/'):
 
         for graph in args.graphs:
@@ -126,7 +126,7 @@ def train(args):
 
 
 if __name__ == "__main__":
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     warnings.filterwarnings("ignore")
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # global parameters
@@ -140,6 +140,7 @@ if __name__ == "__main__":
     parser.add_argument('--hidden2', type=int, default=400, help="Number of units in hidden layer 2.")
     parser.add_argument('--lr', type=float, default=0.001, help="Initial learning rate.")
     parser.add_argument('--epochs', type=int, default=160, help="Number of epochs to train ppi.")
+    parser.add_argument('--device', type=str, default='0', help="cuda device.")
     parser.add_argument('--thr_combined', type=float, default=0.4, help="threshold for combiend ppi network.")#0.4
     parser.add_argument('--thr_evalue', type=float, default=1e-4, help="threshold for similarity network.")# 1e-4
     parser.add_argument('--noise_rate', type=float, default=0.6, help="noise rate.")
@@ -147,6 +148,7 @@ if __name__ == "__main__":
     parser.add_argument('--eps', type=float, default=2.0, help="Eps for Noise.")
     parser.add_argument('--heads', type=int, default=4, help="Attention heads.")
     parser.add_argument('--lambda_', type=float, default=0.4, help="Coefficient for CL loss.")
+
     parser.add_argument('--num_workers', type=int, default=8, help="num_workers.")
     parser.add_argument('--batch_size', type=int, default=128, help="batch_size.")
     parser.add_argument('--save_model', type=bool, default=False, help="save the trained model or not.")
