@@ -83,6 +83,7 @@ Desktop.ini
 
 # Data files (整个数据目录都不需要版本控制)
 data/
+data_backup/
 
 # Model checkpoints
 *.pth

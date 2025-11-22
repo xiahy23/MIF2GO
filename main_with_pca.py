@@ -73,13 +73,13 @@ def train(args):
         print("\n" + "="*60)
         print(f"启用PCA降维: 1280维 -> {args.pca_components}维")
         print("="*60)
-        
+
         # 创建PCA模型
         pca = ESMFeaturePCA(n_components=args.pca_components)
-        
+
         # 检查是否已有保存的PCA模型
         pca_model_path = f'./data/{args.species}/trained_emb_files/pca_model_{args.pca_components}.pkl'
-        
+
         if os.path.exists(pca_model_path) and not args.refit_pca:
             # 加载已有模型
             pca.load(pca_model_path)
@@ -89,21 +89,21 @@ def train(args):
             pca.fit(ESM_33[train_idx], ESM_28[train_idx], ESM_23[train_idx])
             # 保存PCA模型
             pca.save(pca_model_path)
-        
+
         # 对训练集和测试集进行降维
         print("对训练集进行PCA降维...")
         ESM_33_train_reduced, ESM_28_train_reduced, ESM_23_train_reduced = pca.transform(
             ESM_33[train_idx], ESM_28[train_idx], ESM_23[train_idx]
         )
-        
+
         print("对测试集进行PCA降维...")
         ESM_33_test_reduced, ESM_28_test_reduced, ESM_23_test_reduced = pca.transform(
             ESM_33[test_idx], ESM_28[test_idx], ESM_23[test_idx]
         )
-        
+
         print(f"降维后特征形状: {ESM_33_train_reduced.shape}")
         print("="*60 + "\n")
-        
+
         # 使用降维后的特征
         LM_train = [ESM_33_train_reduced, ESM_28_train_reduced, ESM_23_train_reduced]
         LM_test = [ESM_33_test_reduced, ESM_28_test_reduced, ESM_23_test_reduced]
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     warnings.filterwarnings("ignore")
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    
+
     # global parameters
     parser.add_argument('--ppi_attributes', type=int, default=5, help="types of attributes used by ppi.(1 for pathway ablation, 2 for location ablation, 3 for domain ablation, 5 for using all feature)")
     parser.add_argument('--simi_attributes', type=int, default=5, help="types of attributes used by simi.(1 for pathway ablation, 2 for location ablation, 3 for domain ablation, 5 for using all feature)")
@@ -191,17 +191,17 @@ if __name__ == "__main__":
     parser.add_argument('--num_workers', type=int, default=8, help="Number of workers for DataLoader.")
     parser.add_argument('--batch_size', type=int, default=128, help="Batch size for training.")
     parser.add_argument('--save_model', action='store_true', default=False, help="Whether to save the trained model.")
-    
+
     # ======= 新增: PCA相关参数 =======
-    parser.add_argument('--use_pca', action='store_true', default=False, 
+    parser.add_argument('--use_pca', action='store_true', default=False,
                         help="是否对ESM特征使用PCA降维")
-    parser.add_argument('--pca_components', type=int, default=256, 
+    parser.add_argument('--pca_components', type=int, default=256,
                         help="PCA降维后的维度 (推荐128或256)")
     parser.add_argument('--refit_pca', action='store_true', default=False,
                         help="是否强制重新拟合PCA模型")
-    
+
     args = parser.parse_args()
-    
+
     print("\n" + "="*60)
     print("训练配置:")
     print(f"  物种: {args.species}")
@@ -209,5 +209,5 @@ if __name__ == "__main__":
     if args.use_pca:
         print(f"  PCA目标维度: {args.pca_components}")
     print("="*60 + "\n")
-    
+
     train(args)
