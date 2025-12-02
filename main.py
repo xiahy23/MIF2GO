@@ -1,10 +1,11 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "4"
 import argparse
 from input_data import load_data,load_labels
 from trainAE import train_NoiseGAE,train_GAE
 from trainNN import train_nn
 import numpy as np
 import pandas as pd
-import os
 import torch
 from preprocessing import PFPDataset#,collate
 from torch.utils.data import DataLoader
@@ -126,7 +127,7 @@ def train(args):
 
 
 if __name__ == "__main__":
-    #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    #
     warnings.filterwarnings("ignore")
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # global parameters
@@ -152,10 +153,22 @@ if __name__ == "__main__":
     parser.add_argument('--num_workers', type=int, default=8, help="num_workers.")
     parser.add_argument('--batch_size', type=int, default=128, help="batch_size.")
     parser.add_argument('--save_model', type=bool, default=False, help="save the trained model or not.")
-    ################################################################
-
-    ################################################################
-
+    
+    # ==================== 新增：改进版本参数 ====================
+    # 版本1: VIB (Variational Information Bottleneck)
+    parser.add_argument('--use_vib', action='store_true', help="Enable VIB (Version 1)")
+    parser.add_argument('--vib_beta', type=float, default=0.001, help="KL divergence weight for VIB")
+    
+    # 版本2: Modal Dropout
+    parser.add_argument('--use_modal_dropout', action='store_true', help="Enable Modal Dropout (Version 2)")
+    parser.add_argument('--modal_dropout_rate', type=float, default=0.3, help="Probability of dropping a modality")
+    
+    # 版本3: Shared Bottleneck
+    parser.add_argument('--use_shared_bottleneck', action='store_true', help="Enable Shared Bottleneck for LM (Version 3)")
+    
+    # 版本4: Gated Fusion
+    parser.add_argument('--use_gated_fusion', action='store_true', help="Enable Gated Fusion instead of Transformer (Version 4)")
+    
     args = parser.parse_args()
     print(args)
     train(args)
