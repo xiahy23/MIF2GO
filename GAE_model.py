@@ -118,8 +118,7 @@ class NoiseGAE(nn.Module):
 
 
     def forward(self, adj, x,noise_nodes):
-        fea = x
-        #
+        fea = x.clone()
         if len(noise_nodes)!=0:
             random_noise = torch.rand_like(x[noise_nodes]).to(adj.device)
             x[noise_nodes] += torch.sign(x[noise_nodes]) * F.normalize(random_noise, dim=-1) * self.eps

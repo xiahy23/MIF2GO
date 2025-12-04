@@ -1,10 +1,11 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 import argparse
 from input_data import load_data,load_labels
 from trainAE import train_NoiseGAE,train_GAE
 from trainNN import train_nn
 import numpy as np
 import pandas as pd
-import os
 import torch
 from preprocessing import PFPDataset#,collate
 from torch.utils.data import DataLoader
