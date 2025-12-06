@@ -60,3 +60,31 @@ P-value calculation
 2. Unzip the above file to the corresponding directory `./data/Human/`.
 
 3. `python pvalue.py`
+
+## Xia's experiments
+
+## 4.1 PCA
+
+- Switch to the `attempt_pca` branch.
+- Run `python main_with_pca.py --use_pca --pca_components 256` ——降到256维
+
+## 4.2 Loss func improvement
+
+- Switch to the `attempt_loss` branch.
+- Run `python main.py`（调参数在trainNN.py 第22行）
+
+## 4.3 New models to relieve overfitting
+
+- Switch to the `attempt_new_model` branch.
+- Run `python main_with_pca.py --use_pca> logs/log_pcython main.py --use_vib --vib_beta 0.001 > logs/log_vib.txt 2>&1 & `
+- Run `python main_with_pca.py --use_pca> logs/log_pcython main.py --use_modal_dropout --modal_dropout_rate 0.3 > logs/log_modal_dropout.txt 2>&1 &`
+- Run `python main_with_pca.py --use_pca> logs/log_pcython main.py --use_shared_bottleneck > logs/log_shared_bottleneck.txt 2>&1 &`
+- Run `python main_with_pca.py --use_pca> logs/log_pcython main.py --use_gated_fusion > logs/log_gated_fusion.txt 2>&1 &`
+- 也可以组合使用
+## 4.7 Emsemble Learning
+
+- Switch to the `attempt_ensemble` branch.
+- Run `python main_ensemble.py`
+- Switch to the `attempt_bagging_stacking` branch.
+- Run `python main_bagging.py`
+- Run `python main_stacking.py`

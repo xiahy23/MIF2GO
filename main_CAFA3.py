@@ -1,10 +1,12 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 import argparse
 from input_data import load_data_CAFA,load_labels_CAFA
 from trainAE import train_NoiseGAE
 from trainNN import train_nn
 import numpy as np
 import pandas as pd
-import os,time
+import time
 import torch
 from preprocessing import PFPDataset#,collate
 from torch.utils.data import DataLoader
@@ -20,6 +22,7 @@ def reshape(features):
 def train(args):
     # load feature dataframe
     device = torch.device('cuda:' + args.device) if args.device != 'cpu' else torch.device('cpu')
+    print("Using device:", device)
     for aspect,(num_labels,num_tests) in {'mf':[677,1137],'bp':[3992,2392],'cc':[551,1265]}.items():
 
         print("loading features for "+aspect+" ...")
@@ -37,7 +40,7 @@ def train(args):
                     ssn_adj, ssn_features = load_data_CAFA(graph, uniprot, args,aspect)
 
             start_time = time.time()
-            embeddings = train_NoiseGAE(ppi_features, ppi_adj,ssn_features,ssn_adj, args,torch.device('cpu'))#out of gpu memory, so using cpu
+            embeddings = train_NoiseGAE(ppi_features, ppi_adj,ssn_features,ssn_adj, args,torch.device('cuda:0'))#out of gpu memory, so using cpu
             EMB_time = (time.time() - start_time) / 3600
             print('Running EMB_time: %f hours' % EMB_time)
             torch.cuda.empty_cache()
@@ -96,7 +99,7 @@ if __name__ == "__main__":
     parser.add_argument('--hidden2', type=int, default=400, help="Number of units in hidden layer 2.")
     parser.add_argument('--lr', type=float, default=0.001, help="Initial learning rate.")
     parser.add_argument('--epochs', type=int, default=120, help="Number of epochs to train ppi.")
-    parser.add_argument('--device', type=str, default='1', help="cuda device.")
+    parser.add_argument('--device', type=str, default='0', help="cuda device.")
     parser.add_argument('--thr_combined', type=float, default=0.4, help="threshold for combiend ppi network.")#0.4
     parser.add_argument('--thr_evalue', type=float, default=1e-4, help="threshold for similarity network.")# 1e-4
     parser.add_argument('--noise_rate', type=float, default=0.6, help="noise rate.")
@@ -105,7 +108,7 @@ if __name__ == "__main__":
     parser.add_argument('--heads', type=int, default=4, help="Attention heads.")
     parser.add_argument('--lambda_', type=float, default=0.4, help="Coefficient for CL loss.")
 
-    parser.add_argument('--num_workers', type=int, default=8, help="num_workers.")
+    parser.add_argument('--num_workers', type=int, default=32, help="num_workers.")
     parser.add_argument('--batch_size', type=int, default=128, help="batch_size.")
     parser.add_argument('--save_model', type=bool, default=False, help="save the trained model or not.")
     ################################################################

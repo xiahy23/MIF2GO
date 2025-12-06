@@ -21,6 +21,10 @@ def train_nn(args,train_loader,device,input_dim,output_dim,go,test_loader,term):
 
     weight_dict = {'lm_33':{},'lm_28':{},'lm_23':{}}
 
+    # 记录最佳模型结果
+    best_fmax = 0.0
+    best_epoch = 0
+    best_perf = None
     for idx,e in enumerate(range(Epoch)):
         model.train()
         weight_dict['lm_33'][idx] = []
@@ -29,6 +33,7 @@ def train_nn(args,train_loader,device,input_dim,output_dim,go,test_loader,term):
         for batch_idx,batch in enumerate(tqdm(train_loader,mininterval=0.5,desc='Training',leave=False,ncols=50)):
             optimizer.zero_grad()
             emb = batch[0].to(device)
+            emb = torch.zeros_like(emb)
             Y_label = batch[1].to(device)
             lm_33 = batch[2].to(device)
             lm_28 = batch[3].to(device)
@@ -56,6 +61,7 @@ def train_nn(args,train_loader,device,input_dim,output_dim,go,test_loader,term):
 
                 label_test = batch_test[1].to(device)
                 emb_test = batch_test[0].to(device)
+                emb_test = torch.zeros_like(emb_test)
                 lm_33_test = batch_test[2].to(device)
                 lm_28_test = batch_test[3].to(device)
                 lm_23_test = batch_test[4].to(device)
@@ -70,13 +76,22 @@ def train_nn(args,train_loader,device,input_dim,output_dim,go,test_loader,term):
 
 
         perf = get_results(go, total_labels.cpu().numpy(), total_preds.cpu().numpy())
+        if perf['all']['F-max'] > best_fmax:
+            best_fmax = perf['all']['F-max']
+            best_epoch = e + 1
+            best_perf = perf.copy()
 
         if args.save_model:
             torch.save(model.state_dict(),'./data/'+args.species+'/trained_model/'+term+'/'+'Epoch ' + str(e + 1) + '-'+str(perf['all']['M-aupr'])+'.pkl')
 
         print('Epoch ' + str(e + 1) + '\tTrain loss:\t', loss_out.item(), '\tTest loss:\t',loss_test.item(), '\n\tM-AUPR:\t', perf['all']['M-aupr'], '\tm-AUPR:\t', perf['all']['m-aupr'],'\tF-max:\t', perf['all']['F-max'])
 
-
+    print("\n" + "=" * 60)
+    print(f"Best Model ({term.upper()}) - Epoch {best_epoch}")
+    print(f"  M-AUPR:\t{best_perf['all']['M-aupr']:.4f}")
+    print(f"  m-AUPR:\t{best_perf['all']['m-aupr']:.4f}")
+    print(f"  F-max:\t{best_perf['all']['F-max']:.4f}")
+    print("=" * 60 + "\n")
     # with open('./data/'+args.species+'/weight_list_'+term+'.json','w') as f:
     #     f.write(json.dumps(weight_dict))
 

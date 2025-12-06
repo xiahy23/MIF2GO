@@ -94,3 +94,6 @@ data_backup/
 # Logs
 logs/
 *.log
+
+plots/
+plots01/
